@@ -20,6 +20,7 @@ minetest.register_entity('automobiles_lib:pivot_mesh', {
   on_activate = function(self, std)
     self.sdata = minetest.deserialize(std) or {}
     if self.sdata.remove then self.object:remove() end
+    self.object:set_armor_groups({immortal=1})
   end,
 
   get_staticdata = function(self)
@@ -57,6 +58,7 @@ minetest.register_entity('automobiles_lib:pointer', {
   on_activate = function(self, std)
     self.sdata = minetest.deserialize(std) or {}
     if self.sdata.remove then self.object:remove() end
+    self.object:set_armor_groups({immortal=1})
   end,
 
   get_staticdata = function(self)
