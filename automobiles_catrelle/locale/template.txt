@@ -1,0 +1,5 @@
+# textdomain: automobiles_catrelle
+### crafts.lua ###
+Catrelle Body=
+Catrelle=
+Catrelle 4F=
