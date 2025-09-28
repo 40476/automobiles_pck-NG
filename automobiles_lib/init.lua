@@ -84,7 +84,7 @@ end
 -- helpers and co.
 --
 function smartlog(player_name, message)
-    if debug_enabled[player_name] then
+    if true then--debug_enabled[player_name] then
         minetest.chat_send_player(player_name, message)
     end
 end
@@ -950,7 +950,7 @@ minetest.register_chatcommand("lsaudio", {
     end,
 })
 minetest.register_chatcommand("autodebug", {
-    privs = {server = true},
+    privs = {'autodebug'},
     description = "Toggles debug messages from the automobiles mod.",
     func = function(name)
         if debug_enabled[name] then
@@ -1082,8 +1082,8 @@ for _, key in ipairs(key_types) do
           end
 
           -- Owner check for pairing (only owner can pair)
-          if name ~= luaent.owner or not minetest.check_player_privs(puncher, { server = true }) then
-            smartlog(name, S("Only the car owner (@1) or an admin can pair keys to this car.", luaent.owner or "unknown"))
+          if name ~= luaent.owner and not minetest.check_player_privs(puncher, { server = true }) then
+            minetest.chat_send_player(name, S("Only the car owner (@1) or an admin can pair keys to this car.", luaent.owner or "unknown"))
             return itemstack
           end
 
