@@ -4,7 +4,6 @@ car_registry = car_registry or {}  -- NEW: [car_id] = luaentity (for reliable lo
 
 local S = automobiles_lib.S  -- Define early for use in functions below
 local MAX_ACCEL = 25
-local ACC_ADJUST = 10
 local ENERGY_CONSUMPTION_BASE = 40000
 
 minetest.register_entity('automobiles_lib:pivot_mesh', {
@@ -294,7 +293,7 @@ function automobiles_lib.on_punch(self, puncher, ttime, toolcaps, dir, damage)
 
     if is_attached == false then
       smartlog(name, "DEBUG: Handling paint/destroy (not attached)")
-     -- deal with painting or destroying
+      -- deal with painting or destroying
       if itmstck then
         --race status restart
         if item_name == "checkpoints:status_restarter" and self._engine_running == false then
@@ -745,7 +744,7 @@ function automobiles_lib.on_step(self, dtime)
     self._last_light_move = 0
     if self.lights then
 
-      self.fuel_gauge:set_properties({ glow = self._show_lights and 10 or 0 })
+      if self.fuel_gauge then self.fuel_gauge:set_properties({ glow = self._show_lights and 10 or 0 }) end
       self.lights:set_properties({ textures = { self._show_lights and "automobiles_front_lights.png" or "automobiles_white.png" }, glow = self._show_lights and 15 or 0 })
 
       if not is_braking and self.r_lights then
@@ -926,14 +925,13 @@ function automobiles_lib.on_step(self, dtime)
   end
 
   -- Acceleration correction to prevent overflow crash
-  local MAX_ACCEL = 25
   accel.x = math.max(-MAX_ACCEL, math.min(accel.x, MAX_ACCEL))
   accel.z = math.max(-MAX_ACCEL, math.min(accel.z, MAX_ACCEL))
 
   -- Energy consumption
   if self._energy > 0 then
     if not automobiles_lib.is_drift_game then
-      self._energy = self._energy - (automobiles_lib.get_hipotenuse_value(accel, vector.new()) / (self._consumption_divisor or 80000))
+      self._energy = self._energy - (automobiles_lib.get_hipotenuse_value(accel, vector.new()) / (self._consumption_divisor or ENERGY_CONSUMPTION_BASE))
     else
       self._energy = 5
     end

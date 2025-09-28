@@ -84,7 +84,7 @@ end
 -- helpers and co.
 --
 function smartlog(player_name, message)
-    if true then--debug_enabled[player_name] then
+    if debug_enabled[player_name] then
         minetest.chat_send_player(player_name, message)
     end
 end
@@ -305,7 +305,7 @@ end
 
 -- attach passenger
 function automobiles_lib.attach_pax(self, player, onside)
-  local onside = onside or false
+  onside = onside or false
   local name = player:get_player_name()
 
   local eye_y = base_eie_height
@@ -316,6 +316,7 @@ function automobiles_lib.attach_pax(self, player, onside)
 
   if self._passenger == nil then
     self._passenger = name
+    self._passengers[2] = name  -- ADD THIS LINE: Unify with multi-passenger tracking
 
     -- attach the pax
     player:set_attach(self.passenger_seat, "", { x = 0, y = 0, z = 0 }, { x = 0, y = 0, z = 0 })
@@ -380,20 +381,27 @@ function automobiles_lib.attach_pax(self, player, onside)
       end
     end
   end
+  minetest.chat_send_all(dump(self._passengers))  -- Now this won't be empty for front passenger
 end
 
 function automobiles_lib.dettach_pax(self, player)
   if not player then return end
   local name = player:get_player_name() --self._passenger
 
+  -- Clear passenger tracking (your existing logic)
   -- passenger clicked the object => driver gets off the vehicle
-  if self._passenger == name then
+  local is_driver_exiting = false
+  if self.driver_name == name then
+    is_driver_exiting = true
+    -- Assuming driver exit clears _passenger[1] or similar; adjust if needed
+    self._passenger = nil
+    self._passengers[1] = nil  -- If driver uses index 1
+  elseif self._passenger == name then
     self._passenger = nil
     self._passengers[2] = nil
   else
     local max_seats = table.getn(self._seat_pos)
-    for i = max_seats, 1, -1
-    do
+    for i = max_seats, 1, -1 do
       if self._passengers[i] == name then
         self._passengers[i] = nil
         break
@@ -401,7 +409,7 @@ function automobiles_lib.dettach_pax(self, player)
     end
   end
 
-  -- detach the player
+  -- Detach the player (your existing logic)
   if player then
     local pos = player:get_pos()
     player:set_detach()
@@ -420,6 +428,32 @@ function automobiles_lib.dettach_pax(self, player)
 
     player:set_eye_offset({ x = 0, y = 0, z = 0 }, { x = 0, y = 0, z = 0 })
     --remove_physics_override(player, {speed=1,gravity=1,jump=1})
+
+    -- NEW/ENHANCED: Stop radio sounds on detach
+    minetest.log("action", "DEBUG: dettach_pax called for '" .. name .. "' (is driver? " .. tostring(is_driver_exiting) .. ")")
+
+    -- Stop the exiting player's sound specifically
+    if self.radio_handles and self.radio_handles[name] then
+      local handle = self.radio_handles[name]
+      if handle and type(handle) == "number" then
+        minetest.sound_stop(handle)
+        minetest.log("action", "DEBUG: Stopped exiting player '" .. name .. "' sound (handle: " .. tostring(handle) .. ")")
+      else
+        minetest.log("action", "DEBUG: No valid handle for exiting '" .. name .. "' (got: " .. tostring(handle) .. ")")
+      end
+      self.radio_handles[name] = nil
+    elseif self.radio_handles then
+      minetest.log("action", "DEBUG: No handle entry for '" .. name .. "' in radio_handles")
+    else
+      minetest.log("action", "DEBUG: No radio_handles table on detach for '" .. name .. "'")
+    end
+
+    -- If driver is exiting, stop ALL sounds (shutdown radio for vehicle)
+    if is_driver_exiting then
+      minetest.log("action", "DEBUG: Driver exiting - stopping all radio sounds")
+      automobiles_lib.radio_stop(self)
+      -- Optional: Eject all passengers too? If yes, add loop over _passengers and call dettach_pax for each.
+    end
   end
 end
 
