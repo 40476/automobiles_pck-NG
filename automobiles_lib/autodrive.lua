@@ -1,5 +1,3 @@
--- autodrive.lua - Version with pathfinding integration (fixed)
-
 autodrive = {}
 
 -- State - use weak table to avoid memory leaks
@@ -127,7 +125,7 @@ local function avoid_obstacles(self)
         scan_pos.y = pos.y
         local node = minetest.get_node(scan_pos)
         if minetest.registered_nodes[node.name] and 
-           minetest.registered_nodes[node.name].walkable then
+            minetest.registered_nodes[node.name].walkable then
             forward_clear = i - 1
             break
         end
@@ -146,7 +144,7 @@ local function avoid_obstacles(self)
         left_pos.y = pos.y
         local left_node = minetest.get_node(left_pos)
         if minetest.registered_nodes[left_node.name] and 
-           minetest.registered_nodes[left_node.name].walkable then
+            minetest.registered_nodes[left_node.name].walkable then
             left_clear = i - 1
         end
         
@@ -155,7 +153,7 @@ local function avoid_obstacles(self)
         right_pos.y = pos.y
         local right_node = minetest.get_node(right_pos)
         if minetest.registered_nodes[right_node.name] and 
-           minetest.registered_nodes[right_node.name].walkable then
+            minetest.registered_nodes[right_node.name].walkable then
             right_clear = i - 1
         end
     end

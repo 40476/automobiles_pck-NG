@@ -128,17 +128,17 @@ function delorean.driver_formspec(name)
     basic_form = basic_form.."button[2.5,7.5;1.5,1;remove_bookmark;" .. S("Del") .. "]"
     
     -- Bookmark list (sidebar)
-    basic_form = basic_form.."label[6,0.5;" .. S("Bookmarks") .. "]"
+    basic_form = basic_form.."label[6,1;" .. S("Bookmarks") .. "]"
     if bookmark_list ~= "" then
         if has_selection then
-            basic_form = basic_form.."textlist[6,1;3.5,6;bookmark_list;" .. bookmark_list .. ";" .. tostring(selected_idx) .. "]"
+            basic_form = basic_form.."textlist[6,1.5;3.5,6;bookmark_list;" .. bookmark_list .. ";" .. tostring(selected_idx) .. "]"
         else
-            basic_form = basic_form.."textlist[6,1;3.5,6;bookmark_list;" .. bookmark_list .. ";0]"
+            basic_form = basic_form.."textlist[6,1.5;3.5,6;bookmark_list;" .. bookmark_list .. ";0]"
         end
     else
-        basic_form = basic_form.."textlist[6,1;3.5,6;bookmark_list;;0]"
+        basic_form = basic_form.."textlist[6,1.5;3.5,6;bookmark_list;;0]"
     end
-    basic_form = basic_form.."button[6,7.2;3.5,0.8;goto_bookmark;" .. S("Set Target") .. "]"
+    basic_form = basic_form.."button[6,7.7;3.5,0.8;goto_bookmark;" .. S("Set Target") .. "]"
     basic_form = basic_form..fs_radio
     minetest.show_formspec(name, "delorean:driver_main", basic_form)
 end

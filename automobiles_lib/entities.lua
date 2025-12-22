@@ -1017,7 +1017,7 @@ function automobiles_lib.on_step(self, dtime)
           automobiles_lib.add_smoke(self, curr_pos, yaw, self._rear_wheel_xpos * self._vehicle_scale)
 
           if not automobiles_lib.extra_drift and self._last_time_drift_snd >= 2.0 and
-             math.abs(later_speed) > min_later_speed then
+              math.abs(later_speed) > min_later_speed then
             self._last_time_drift_snd = 0
             minetest.sound_play("automobiles_drifting", {
               pos = curr_pos,
@@ -1066,9 +1066,9 @@ function automobiles_lib.key_toggle_lock(ent, player_name)
     smartlog(player_name, S("Invalid car reference."))
     return
   end
-  local S = automobiles_lib.S
   ent._locked = not ent._locked
   local action = ent._locked and "lock" or "unlock"
+  if ent.horn_handle then minetest.sound_stop(ent.horn_handle) end
   minetest.sound_play({name = "lock_unlock_sfx"}, {pos = ent.object:get_pos(), gain = 0.6, max_hear_distance = 32, loop = false})
   if automobiles_lib.flash_turn_signals then
     automobiles_lib.flash_turn_signals(ent, action)
@@ -1079,7 +1079,6 @@ end
 
 function automobiles_lib.key_panic(ent)
   if not ent or not ent.object then return end
-  local S = automobiles_lib.S
   -- Panic: Continuous horn (assumes flash_turn_signals handles sound for "panic")
   if automobiles_lib.flash_turn_signals then
     automobiles_lib.flash_turn_signals(ent, "panic")
@@ -1088,8 +1087,8 @@ end
 
 function automobiles_lib.key_locate(ent)
   if not ent or not ent.object then return end
-  local S = automobiles_lib.S
   -- Locate: Flash + sound (assumes flash_turn_signals does visuals/sound for "locate")
+  if ent.horn_handle then minetest.sound_stop(ent.horn_handle) end
   minetest.sound_play({name = ent._horn_sound or "automobiles_horn"}, {pos = pos, gain = 1.3, max_hear_distance = 100, loop = false})
   automobiles_lib.flash_turn_signals(ent, "locate")
 end
@@ -1124,8 +1123,9 @@ function automobiles_lib.flash_turn_signals(self, action)
   local sound = nil
 
   if action == "panic" then
-    sound = minetest.sound_play({name = self._horn_sound or "automobiles_horn"}, {pos = self.object:get_pos(), gain = 1.3, max_hear_distance = 50, loop = true})
-    minetest.after(30, function() minetest.sound_stop(sound) end)  -- Stop after 30s bc bruh
+    if self.horn_handle then minetest.sound_stop(self.horn_handle) end
+    self.horn_handle = minetest.sound_play({name = self._horn_sound or "automobiles_horn"}, {pos = self.object:get_pos(), gain = 1.3, max_hear_distance = 50, loop = true})
+    minetest.after(30, function() minetest.sound_stop(self.horn_handle) end)  -- Stop after 30s bc bruh
     return  -- Only sound for panic
   end
   -- elseif action == "locate" then

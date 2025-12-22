@@ -141,9 +141,9 @@ function automobiles_lib.driver_formspec(name)
     "field[1,5.7;3,1;bookmark_name;" .. S("Bookmark Name") .. ";]",
     "button[1,6.7;1.5,1;add_bookmark;" .. S("Add") .. "]",
     "button[2.5,6.7;1.5,1;remove_bookmark;" .. S("Del") .. "]",
-    "label[6,0.5;" .. S("Bookmarks") .. "]",
-    "textlist[6,1;3.5,5.5;bookmark_list;" .. bookmark_list .. ";" .. tostring(selected_idx) .. "]",
-    "button[6,6.7;3.5,1;goto_bookmark;" .. S("Set Target") .. "]",
+    "label[6,1;" .. S("Bookmarks") .. "]",
+    "textlist[6,1.7;3.5,5.5;bookmark_list;" .. bookmark_list .. ";" .. tostring(selected_idx) .. "]",
+    "button[6,7.4;3.5,1;goto_bookmark;" .. S("Set Target") .. "]",
      fs_radio
   }, "")
   

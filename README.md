@@ -21,3 +21,27 @@ Fuel is needed to operate the vehicles, however a small amount of fuel is provid
 <kbd>Shift</kbd>: Reverse
 
 Vehicles can be colored by punching them with either dye or the vehicle painter. To fuel a vehicle, punch it with biofuel.
+
+## Key Features
+
+**Physics & Mechanics**  
+- Realistic terrain navigation including slopes and elevation changes  
+- Buoyancy system for water interactions  
+- Ground friction and suspension physics  
+- Disability in liquid when buoyancy > 1  
+
+**Vehicle Customization**  
+- Paint customization with dyes/vehicle painter  
+- Horn sound activation  
+- Springiness/bounce physics customization  
+
+**Core Systems**  
+- Fuel requirement with initial starter supply  
+- Reverse gear capabilities  
+- Wheel animations tied to movement  
+- Automatic engine cutoff when stationary  
+- Water drag mechanics  
+
+**Vehicle Variety**  
+- Multiple vehicle types included (Beetle, Buggy, Coupe, etc.)  
+- Unique handling characteristics per vehicle

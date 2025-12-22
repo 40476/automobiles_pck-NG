@@ -28,7 +28,8 @@ end
 -- Play sound for a single player (with full handle management)
 function automobiles_lib.radio_play(ent, track_name)
   if not ent or not track_name then return end  -- Safety: Bail if bad inputs
-
+  ent.radio_gain = ent.radio_gain or 0.7
+  ent.radio_loop_enabled = ent.radio_loop_enabled or false
   -- Stop any existing sounds first (clean old state; safe even if radio_handles is nil)
   automobiles_lib.radio_stop(ent)
 
@@ -41,8 +42,8 @@ function automobiles_lib.radio_play(ent, track_name)
 
   -- Play for driver IMMEDIATELY and store handle
   local driver_handle = minetest.sound_play(track_name, {
-    gain = 1.0,
-    loop = false,
+    gain = ent.radio_gain,
+    loop = ent.radio_loop_enabled,
     to_player = ent.driver_name
   })
   ent.radio_handle = driver_handle  -- Legacy compatibility
@@ -85,8 +86,8 @@ function automobiles_lib.radio_play(ent, track_name)
   for _, pname in ipairs(passenger_list) do
     -- First attempt: Immediate
     local handle = minetest.sound_play(track_name, {
-      gain = 1.0,
-      loop = false,
+      gain = ent.radio_gain,
+      loop = ent.radio_loop_enabled,
       to_player = pname
     })
     ent.radio_handles[pname] = handle
@@ -98,8 +99,8 @@ function automobiles_lib.radio_play(ent, track_name)
       minetest.after(0.2, function()
         if minetest.get_player_by_name(pname) and ent.radio_handles and ent.radio_handles[pname] == nil then
           local retry_handle = minetest.sound_play(track_name, {
-            gain = 1.0,
-            loop = false,
+            gain = ent.radio_gain,
+            loop = ent.radio_loop_enabled,
             to_player = pname
           })
           ent.radio_handles[pname] = retry_handle
@@ -216,17 +217,48 @@ function automobiles_lib.handle_radio_formspec_fields(name, ent, fields)
     else
       minetest.chat_send_player(name, "No track selected.")
     end
+    return true
+  end
+  if fields.looptoggle then
+    if ent.radio_loop_enabled then
+      ent.radio_loop_enabled = false
+    else
+      ent.radio_loop_enabled = true
+    end
+    if ent.radio_selected_track then
+      automobiles_lib.radio_play(ent, ent.radio_selected_track)
+    end
     local formspec_f = automobiles_lib.driver_formspec
     if ent._formspec_function then formspec_f = ent._formspec_function end
     formspec_f(name)
     return true
   end
-
+  if fields.radio_vol_up then
+    if ent.radio_gain == nil then ent.radio_gain = 0.7 end
+    if ent.radio_gain < 1 then
+      ent.radio_gain = ent.radio_gain+0.1
+      if ent.radio_selected_track then
+        automobiles_lib.radio_play(ent, ent.radio_selected_track)
+        -- smartlog(ent.driver_name,"radio gain: "..dump(ent.radio_gain))
+      end
+    end
+    
+    return true
+  end
+  if fields.radio_vol_down then
+    if ent.radio_gain == nil then ent.radio_gain = 0.7 end
+    if ent.radio_gain > 0 then
+      ent.radio_gain = ent.radio_gain-0.1
+      if ent.radio_selected_track then
+        automobiles_lib.radio_play(ent, ent.radio_selected_track)
+        -- smartlog(ent.driver_name,"radio gain: "..dump(ent.radio_gain))
+      end
+    end
+    
+    return true
+  end
   if fields.radio_stop then
     automobiles_lib.radio_stop(ent)
-    local formspec_f = automobiles_lib.driver_formspec
-    if ent._formspec_function then formspec_f = ent._formspec_function end
-    formspec_f(name)
     return true
   end
 
@@ -258,13 +290,16 @@ function automobiles_lib.get_radio_formspec_fragment(ent,x_offset)
 
 
   return table.concat({
-    "label[" .. tostring(x_offset+0.3) .. ",0.3;Radio]",
-    "dropdown[" .. tostring(x_offset+0.3) .. ",0.4;3.5;radio_filter;artist,genre,allsongs;" .. selected_filter .. "]",
-    "textlist[" .. tostring(x_offset+0.3) .. ",1.5;3.5,4.5;radio_track_list;" .. track_list .. "]",
-    "button[" .. tostring(x_offset+0.3) .. ",6.2;1.5,1;radio_play;Play]",
-    "button[" .. tostring(x_offset+2.2) .. ",6.2;1.5,1;radio_stop;Stop]",
-    "button[" .. tostring(x_offset+0.3) .. ",7.2;1.5,1;radio_skip;Skip]",
-    "button[" .. tostring(x_offset+2.2) .. ",7.2;1.5,1;radio_unskip;Unskip]"
+    "label[" .. tostring(x_offset+0.3) .. ",1;Radio]",
+    "dropdown[" .. tostring(x_offset+0.3) .. ",1.5;3.5;radio_filter;artist,genre,allsongs;" .. selected_filter .. "]",
+    "textlist[" .. tostring(x_offset+0.3) .. ",2.6;3.5,4.8;radio_track_list;" .. track_list .. "]",
+    "button[" .. tostring(x_offset+1.05) .. ",7.5;0.75,0.5;radio_play;>]",
+    "button[" .. tostring(x_offset+1.05) .. ",8;0.75,0.5;radio_stop;|X|]",
+    "button[" .. tostring(x_offset+1.8) .. ",7.5;0.75,1;radio_skip;>>]",
+    "button[" .. tostring(x_offset+0.3) .. ",7.5;0.75,1;radio_unskip;<<]",
+    "checkbox[" .. tostring(x_offset+2.6) .. ",7.67;looptoggle;↳↰;".. tostring(ent.radio_loop_enabled or false) .."]",
+    "button[" .. tostring(x_offset+2.6) .. ",8;0.6,0.5;radio_vol_up;+]",
+    "button[" .. tostring(x_offset+3.20) .. ",8;0.6,0.5;radio_vol_down;-]",
   }, "")
 end
 

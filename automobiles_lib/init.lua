@@ -113,10 +113,6 @@ function automobiles_lib.sign(n)
   return n >= 0 and 1 or -1
 end
 
-function automobiles_lib.minmax(v, m)
-  return math.min(math.abs(v), m) * minekart.sign(v)
-end
-
 function automobiles_lib.properties_copy(origin_table)
   local tablecopy = {}
   for k, v in pairs(origin_table) do
@@ -307,7 +303,13 @@ end
 function automobiles_lib.attach_pax(self, player, onside)
   onside = onside or false
   local name = player:get_player_name()
-
+  minetest.sound_play({ name = (self._door_sound or "automobiles_door") },{
+    object = self.object,
+    gain = 4,
+    pitch = snd_pitch,
+    max_hear_distance = 10,
+    loop = false,
+  })
   local eye_y = base_eie_height
   if automobiles_lib.detect_player_api(player) == 1 then
     eye_y = eye_y + eye_height_plus_value
@@ -381,13 +383,19 @@ function automobiles_lib.attach_pax(self, player, onside)
       end
     end
   end
-  minetest.chat_send_all(dump(self._passengers))  -- Now this won't be empty for front passenger
+  --minetest.chat_send_all(dump(self._passengers))  -- Now this won't be empty for front passenger
 end
 
 function automobiles_lib.dettach_pax(self, player)
   if not player then return end
   local name = player:get_player_name() --self._passenger
-
+  minetest.sound_play({ name = (self._door_sound or "automobiles_door") },{
+    object = self.object,
+    gain = 4,
+    pitch = snd_pitch,
+    max_hear_distance = 10,
+    loop = false,
+  })
   -- Clear passenger tracking (your existing logic)
   -- passenger clicked the object => driver gets off the vehicle
   local is_driver_exiting = false
@@ -936,6 +944,10 @@ minetest.register_privilege("valet_parking", {
   description = S("Gives a valet parking priv for a player"),
   give_to_singleplayer = true
 })
+minetest.register_privilege("autodebug", {
+  description = S("Gives a automobiles debugging priv for a player"),
+  give_to_singleplayer = true
+})
 
 minetest.register_chatcommand("transfer_vehicle", {
   params = "<new_owner>",
@@ -984,7 +996,7 @@ minetest.register_chatcommand("lsaudio", {
     end,
 })
 minetest.register_chatcommand("autodebug", {
-    privs = {'autodebug'},
+    privs = 'autodebug',
     description = "Toggles debug messages from the automobiles mod.",
     func = function(name)
         if debug_enabled[name] then
@@ -1055,7 +1067,7 @@ local old_entities = {
   "automobiles_trans_am:pointer",
   "automobiles_buggy:steering",
   "automobiles_vespa:pivot_mesh",
-  "automobiles_motorcycle:pivot_mesh",
+  "automobiles_nope:pivot_mesh",
 }
 
 
