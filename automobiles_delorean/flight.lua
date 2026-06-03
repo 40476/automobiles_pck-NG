@@ -21,7 +21,7 @@ function delorean.gravity_auto_correction(self, dtime)
         if curr_vel.y < 0 then
             self._car_gravity = 0.5
         else
-            self._car_gravity = -0.5
+            self._car_gravity = -15
         end
     end
     
@@ -120,7 +120,7 @@ function delorean.set_mode(self, is_attached, curr_pos, velocity, player, dtime)
             delorean.gravity_auto_correction(self, dtime)
 
             --check if is near the ground, so revert the flight mode
-            local noded = automobiles_lib.nodeatpos(automobiles_lib.pos_shift(curr_pos,{y=-0.6}))
+            local noded = automobiles_lib.nodeatpos(automobiles_lib.pos_shift(curr_pos,{y=-0.1}))
             if (noded and noded.drawtype ~= 'airlike') then
                 if noded.drawtype ~= 'liquid' then
                     if not self._start_flight_semaphore then --check if the flight started now
